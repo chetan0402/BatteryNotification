@@ -3,7 +3,6 @@ from win32api import GetLastError
 from winerror import ERROR_ALREADY_EXISTS
 from sys import exit
 from time import time
-import atexit
 import logging
 
 
@@ -25,12 +24,6 @@ else:
     toast = ToastNotifier()
     has_done_once={'100':False,'80':False}
     last_battery_percent=psutil.sensors_battery().percent
-
-    def on_exit(sig,func=None):
-        logging.info("Script closing")
-        logging.shutdown()
-
-    atexit.register(on_exit)
 
     while True:
         sleep(5)

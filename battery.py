@@ -4,9 +4,10 @@ from winerror import ERROR_ALREADY_EXISTS
 from sys import exit
 from time import time
 import logging
+from os import remove
 
-
-logging.basicConfig(filename=f"batteryNotifi-{int(time())}.log",format="%(asctime)s-%(levelname)s-%(message)s", level=logging.INFO,filemode='w+')
+filename=f"batteryNotifi-{int(time())}.log"
+logging.basicConfig(filename=filename,format="%(asctime)s-%(levelname)s-%(message)s", level=logging.INFO,filemode='w+')
 logging.info("Running")
 
 handle = CreateMutex(None,1,'BatteryNotifi')
@@ -19,32 +20,81 @@ else:
     import psutil
     from time import sleep
     from win10toast import ToastNotifier
+    import json
 
-    battery_per=0
     toast = ToastNotifier()
-    has_done_once={'100':False,'80':False}
     last_battery_percent=psutil.sensors_battery().percent
 
-    while True:
-        sleep(5)
-        battery=psutil.sensors_battery()
+    try:
+        with open('config.json') as json_file:
+            config=json.load(json_file)
+            json_file.close()
+    except ValueError as e:
+        toast.show_toast("Syntax Error in config file","Check config.json")
+    except FileNotFoundError as e:
+        config="""{
+            "range":[
+                {"MAX_VAL":30,"MIN_VAL":0,"MSG":"Put laptop in charging","PLUG":"False"}
+                ],
+            "point":[
+                {"VAL":80,"MSG":"Remove from charging","PLUG":"True"}
+                ],
+            "NOTIFY_WHEN_FULL":"True",
+            "DEL_LOG":"True"
+            }"""
+        with open('config.json',"rw+") as json_file:
+            json_file.write(config)
+            config=json.load(json_file)
+            json_file.close()
+        toast.show_toast("Config file created","Edit config.json as per your needs")
 
-        if battery.power_plugged and battery.percent==100 and not has_done_once["100"]:
-            toast.show_toast("Laptop charged","Remove the charger")
-            has_done_once['100']=True
-            logging.info("Battery 100, "+str(has_done_once['100']))
+    def bool_(thing):
+        if str(thing)=="True" or str(thing)=="TRUE" or str(thing)=="1":
+            return True
+        else:
+            return False
 
-        if battery.power_plugged and battery.percent==80 and not has_done_once['80']:
-            toast.show_toast("Laptop battery at 80%","Remove if you want to increase battery life")
-            has_done_once["80"]=True
-            logging.info("Battery 80, "+str(has_done_once["80"]))
+    if bool_(config["DEL_LOG"]):
+        logging.disable()
+        remove(filename)   #doesn't work currently
 
-        if not battery.power_plugged and battery.percent<31 and last_battery_percent!=battery.percent:
-            toast.show_toast(f"Battery is at {battery.percent}","Plug it in if you want to")
+
+    def send_battery_debug(battery):
+        if not bool_(config["DEL_LOG"]):
             logging.info(f"Battery {battery.percent}")
 
-        if not battery.power_plugged:
-            has_done_once['100']=False
-            has_done_once["80"]=False
+    def init_point():
+        config["DONE_FULL_ONCE"]=False
+        for points in config["point"]:
+            points["DONE_ONCE"]=False
 
+    def main_loop():
+        sleep(1)
+        battery=psutil.sensors_battery()
         last_battery_percent=battery.percent
+
+        if bool_(config["NOTIFY_WHEN_FULL"]) and battery.percent==100 and not bool_(config["DONE_FULL_ONCE"]):
+            toast.show_toast("Laptop abttery at 100%","Please remove from charging")
+            config["DONE_FULL_ONCE"]=True
+
+        for points in config["point"]:
+            if points["VAL"]==battery.percent and not points["DONE_ONCE"] and battery.power_plugged==bool_(config["PLUG"]):
+                toast.show_toast(f"Laptop battery at {battery.percent}",points["MSG"])
+                points["DONE_ONCE"]=True
+                send_battery_debug(battery)
+                
+
+        for ranges in config["range"]:
+            if ranges["MIN_VAL"]<=battery.percent and ranges["MAX_VAL"]>=battery.percent and last_battery_percent!=battery.percent and battery.power_plugged==bool_(config["PLUG"]):
+                toast.show_toast(f"Laptop battery at {battery.percent}",ranges["MSG"])
+                send_battery_debug(battery)
+
+        if last_battery_percent!=battery.percent:
+            config["DONE_FULL_ONCE"]=False
+            for points in config["point"]:
+                points["DONE_ONCE"]=False
+
+
+    init_point()
+    while True:
+        main_loop()

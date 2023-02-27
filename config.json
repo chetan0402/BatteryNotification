@@ -1,0 +1,10 @@
+{
+    "range":[
+        {"MAX_VAL":30,"MIN_VAL":0,"MSG":"Put laptop in charging","PLUG":"False"}
+    ],
+    "point":[
+        {"VAL":80,"MSG":"Remove from charging","PLUG":"True"}
+    ],
+    "NOTIFY_WHEN_FULL":"True",
+    "DEL_LOG":"False"
+}

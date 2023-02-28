@@ -4,7 +4,7 @@ from winerror import ERROR_ALREADY_EXISTS
 from sys import exit
 from time import time
 import logging
-from os import remove,getpid
+from os import remove, getpid
 
 filename = f"batteryNotifi-{int(time())}.log"
 logging.basicConfig(filename=filename, format="%(asctime)s-%(levelname)s-%(message)s", level=logging.INFO,

@@ -6,6 +6,8 @@ print("Killing process...")
 try:
     with open("PID", "r") as pid_file:
         pid = int(pid_file.read())
+        pid_file.close()
+        os.remove("PID")
 
     os.kill(pid, signal.SIGTERM)
     print("BatteryNotification process has been killed.")

@@ -4,7 +4,7 @@ from winerror import ERROR_ALREADY_EXISTS
 from sys import exit
 from time import time
 import logging
-from os import remove
+from os import remove,getpid
 
 filename = f"batteryNotifi-{int(time())}.log"
 logging.basicConfig(filename=filename, format="%(asctime)s-%(levelname)s-%(message)s", level=logging.INFO,
@@ -24,6 +24,9 @@ else:
 
     toast = ToastNotifier()
     last_battery_percent = psutil.sensors_battery().percent
+    with open("PID", "w+") as pid_file:
+        pid_file.write(str(getpid()))
+        pid_file.close()
 
     try:
         with open('config.json') as json_file:
@@ -94,7 +97,8 @@ else:
 
         for ranges in config["range"]:
             if ranges["MIN_VAL"] <= battery.percent <= ranges[
-                "MAX_VAL"] and last_battery_percent != battery.percent and battery.power_plugged == bool_(ranges["PLUG"]):
+                "MAX_VAL"] and last_battery_percent != battery.percent and battery.power_plugged == bool_(
+                ranges["PLUG"]):
                 toast.show_toast(f"Laptop battery at {battery.percent}", ranges["MSG"])
                 send_battery_debug(battery)
 

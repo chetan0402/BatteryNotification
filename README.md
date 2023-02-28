@@ -4,6 +4,7 @@ This Python script is designed to notify the user when their battery is fully ch
 
 # Requirements
 - Python (only tested on 3.10.x right now)
+- Only works on windows
 ## Modules required
 - win10toast (`pip install win10toast`)
 - psutil (`pip install psutil`)
@@ -15,5 +16,7 @@ This Python script is designed to notify the user when their battery is fully ch
 
 The script will start running and will continuously monitor your battery percentage. When the battery reaches 100%, a notification will be displayed indicating that the battery is fully charged. When the battery reaches 80% and charging, another notification will be displayed reminding you to unplug your device. Finally, when the battery percentage drops below 30%, the script will display a notification reminding you to charge your device.
 
+#### Change this behaviour by editing the `config.json`
+
 # Notes
-Stop the script using task manager or restart currently
+Stop the script using `killswitch.py`

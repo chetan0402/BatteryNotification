@@ -91,20 +91,20 @@ else:
         global config
 
         if bool_(config["NOTIFY_WHEN_FULL"]) and battery.percent == 100 and not bool_(
-                config["DONE_FULL_ONCE"]) and not battery.power_plugged:
+                config["DONE_FULL_ONCE"]) and battery.power_plugged:
             toast.show_toast("Laptop abttery at 100%", "Please remove from charging")
             config["DONE_FULL_ONCE"] = True
 
         for points in config["point"]:
-            if points["VAL"] == battery.percent and not points["DONE_ONCE"] and battery.power_plugged == bool_(
+            if int(points["VAL"]) == battery.percent and not points["DONE_ONCE"] and battery.power_plugged == bool_(
                     points["PLUG"]):
                 toast.show_toast(f"Laptop battery at {battery.percent}", points["MSG"])
                 points["DONE_ONCE"] = True
                 send_battery_debug(battery)
 
         for ranges in config["range"]:
-            if ranges["MIN_VAL"] <= battery.percent <= ranges[
-                "MAX_VAL"] and last_battery_percent != battery.percent and battery.power_plugged == bool_(
+            if int(ranges["MIN_VAL"]) <= battery.percent <= int(ranges[
+                "MAX_VAL"]) and last_battery_percent != battery.percent and battery.power_plugged == bool_(
                 ranges["PLUG"]):
                 toast.show_toast(f"Laptop battery at {battery.percent}", ranges["MSG"])
                 send_battery_debug(battery)

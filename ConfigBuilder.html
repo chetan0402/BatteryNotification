@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.min.css" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+  <script src="config.js"></script>
+  <title>Config Builder</title>
+</head>
+
+<body>
+  <main data-theme="dark" style="padding-left:2%;padding-right:2%">
+    <div class="grid">
+      <article>
+        <form id="point-form">
+          <div class="grid">
+            <label>
+              Percentage:-
+              <input type="text" id="point-number" required onkeyup="validatePercentage(this)"/>
+            </label>
+            <label>
+              Message to display:-
+              <input type="text" id="point-msg" required/>
+            </label>
+          </div>
+          <fieldset>
+            <legand>Notify while plugged?</legand>
+            <label>
+              <input type="radio" name="plug" id="True"/>Yes
+            </label>
+            <label>
+              <input type="radio" name="plug" id="False" />No
+            </label>
+          </fieldset>
+          <button type="submit">ADD</button>
+        </form>
+        <footer>
+          <table role="grid">
+            <thead>
+              <tr>
+                <th scope="col">Percentage</th>
+                <th scope="col">Message</th>
+                <th scope="col">Plugged</th>
+              </tr>
+            </thead>
+            <tbody id="point-table">
+            </tbody>
+          </table>
+        </footer>
+      </article>
+      <article>
+        <form id="range-form">
+          <div class="grid">
+            <label>Max Value percentage:-
+              <input type="text" id="max-val-per" onkeyup="validatePercentage(this)"/>
+            </label>
+            <label>Min Value percentage:-
+              <input type="text" id="min-val-per" onkeyup="validatePercentage(this)"/>
+            </label>
+          </div>
+          <label>
+            Message to display:-
+            <input type="text" id="range-msg" required/>
+          </label>
+          <fieldset>
+            <legand>Notify while plugged?</legand>
+            <label>
+              <input type="radio" name="plug" id="TrueRange"/>Yes
+            </label>
+            <label>
+              <input type="radio" name="plug" id="FalseRange" />No
+            </label>
+          </fieldset>
+          <button type="submit">ADD</button>
+        </form>
+        <footer>
+          <table role="grid">
+            <thead>
+              <tr>
+                <th scope="col">Maximum percentage</th>
+                <th scope="col">Minimum percentage</th>
+                <th scope="col">Message</th>
+                <th scope="col">Plugged</th>
+              </tr>
+            </thead>
+            <tbody id="range-table"></tbody>
+          </table>
+        </footer>
+      </article>
+    </div>
+    <article>
+      <div class="grid" id="download-div">
+        <fieldset>
+          <label>
+            Debug Mode:-
+            <input type="checkbox" id="debug-mode" onchange="debugMode()"/>
+          </label>
+        </fieldset>
+        <a href="#download-json" role="button" class="outline" onclick="downloadJson()">Convert to config.json</a>
+      </div>
+    </article>
+  </main>
+</body>
+
+</html>

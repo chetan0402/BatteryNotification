@@ -1,0 +1,4 @@
+psutil~=5.9.4
+pypiwin32~=223
+pywin32~=305
+win10toast~=0.9

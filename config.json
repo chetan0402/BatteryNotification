@@ -6,5 +6,5 @@
         {"VAL":80,"MSG":"Remove from charging","PLUG":"True"}
     ],
     "NOTIFY_WHEN_FULL":"True",
-    "DEL_LOG":"False"
+    "DEL_LOG":"True"
 }

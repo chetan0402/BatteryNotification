@@ -2,19 +2,18 @@ from win32event import CreateMutex
 from win32api import GetLastError
 from winerror import ERROR_ALREADY_EXISTS
 from sys import exit
-from time import time
-import logging
-from os import remove, getpid
+from os import getpid, listdir, remove
+from CustomLogger import Logger
 
-filename = f"batteryNotifi-{int(time())}.log"
-logging.basicConfig(filename=filename, format="%(asctime)s-%(levelname)s-%(message)s", level=logging.INFO,
-                    filemode='w+')
-logging.info("Running")
+logger = Logger()
+logger.createFile()
+logger.info("Running...")
 
 handle = CreateMutex(None, 1, 'BatteryNotifi')
 
 if GetLastError() == ERROR_ALREADY_EXISTS:
-    logging.info("Already existed")
+    logger.info("Already existed")
+    logger.deleteFile()
     exit(0)
 else:
     import psutil
@@ -24,15 +23,17 @@ else:
 
     toast = ToastNotifier()
     last_battery_percent = psutil.sensors_battery().percent
-    with open("PID", "w+") as pid_file:
-        pid_file.write(str(getpid()))
-        pid_file.close()
+    pid_file = open("PID", "w+")
+    pid_file.write(str(getpid()))
+    pid_file.flush()
 
     try:
         with open('config.json') as json_file:
             config = json.load(json_file)
             json_file.close()
-    except ValueError as e:
+    except json.JSONDecodeError as e:
+        toast.show_toast("Syntax Error in config file", "Check config.json")
+    except json.JSONDecoder as e:
         toast.show_toast("Syntax Error in config file", "Check config.json")
     except FileNotFoundError as e:
         config_default = """{
@@ -60,13 +61,18 @@ else:
 
 
     if bool_(config["DEL_LOG"]):
-        logging.disable()
-        remove(filename)  # doesn't work currently
+        logger.deleteFile()
+        for filename in listdir():
+            if filename.startswith("batteryNotifi-") and filename.endswith(".log"):
+                try:
+                    remove(filename)
+                finally:
+                    pass
 
 
     def send_battery_debug(battery):
         if not bool_(config["DEL_LOG"]):
-            logging.info(f"Battery {battery.percent}")
+            logger.info(f"Battery {battery.percent}")
 
 
     def init_point():
@@ -82,6 +88,7 @@ else:
         sleep(1)
         battery = psutil.sensors_battery()
         global last_battery_percent
+        global config
 
         if bool_(config["NOTIFY_WHEN_FULL"]) and battery.percent == 100 and not bool_(
                 config["DONE_FULL_ONCE"]) and not battery.power_plugged:
@@ -90,7 +97,7 @@ else:
 
         for points in config["point"]:
             if points["VAL"] == battery.percent and not points["DONE_ONCE"] and battery.power_plugged == bool_(
-                    config["PLUG"]):
+                    points["PLUG"]):
                 toast.show_toast(f"Laptop battery at {battery.percent}", points["MSG"])
                 points["DONE_ONCE"] = True
                 send_battery_debug(battery)
@@ -107,6 +114,14 @@ else:
             for points in config["point"]:
                 points["DONE_ONCE"] = False
             last_battery_percent = battery.percent
+
+        try:
+            with open("battery.reload") as reload:
+                with open('config.json') as json_file:
+                    config = json.load(json_file)
+                    json_file.close()
+        except FileNotFoundError as e:
+            pass
 
 
     init_point()

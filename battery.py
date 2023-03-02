@@ -120,6 +120,10 @@ else:
                 with open('config.json') as json_file:
                     config = json.load(json_file)
                     json_file.close()
+                    init_point()
+                reload.close()
+            remove("battery.reload")
+            logger.info("Config reloaded")
         except FileNotFoundError as e:
             pass
 

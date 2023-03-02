@@ -25,7 +25,7 @@ function pointSubmit(){
 function rangeSubmit(){
     config["range"].push({
         "MAX_VAL":$("#max-val-per").val(),
-        "MIN_VAL":$("#max-val-per").val(),
+        "MIN_VAL":$("#min-val-per").val(),
         "MSG":$("#range-msg").val(),
         "PLUG":getPlugRange()
     })

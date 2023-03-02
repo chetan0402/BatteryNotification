@@ -1,0 +1,1 @@
+echo .>"battery.reload"

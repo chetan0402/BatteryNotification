@@ -100,6 +100,7 @@ else:
                     points["PLUG"]):
                 toast.show_toast(f"Laptop battery at {battery.percent}", points["MSG"])
                 points["DONE_ONCE"] = True
+                last_battery_percent = battery.percent
                 send_battery_debug(battery)
 
         for ranges in config["range"]:
@@ -123,8 +124,8 @@ else:
                     init_point()
                 reload.close()
             remove("battery.reload")
-            logger.info("Config reloaded")
-        except FileNotFoundError as e:
+            send_battery_debug("Config reloaded")
+        except FileNotFoundError:
             pass
 
 

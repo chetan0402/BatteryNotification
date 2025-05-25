@@ -6,7 +6,7 @@ try:
         if process.is_running() and process.name().find("python") != -1:
             print("BatteryNotifi is already running")
             exit(0)
-except psutil.NoSuchProcess as e:
+except (psutil.NoSuchProcess, FileNotFoundError):
     print("BatteryNotifi is not running, starting a new instance")
     with open("PID", "w+") as pid_file:
         pid_file.write(str(psutil.Process().pid))
